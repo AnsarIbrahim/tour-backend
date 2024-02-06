@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -73,8 +75,7 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     location: coordinates,
-    image:
-      'https://unsplash.com/photos/man-in-middle-of-wheat-field-6VPEOdpFNAs/download?force=true&w=1920',
+    image: req.file.path,
     creator,
   });
 
@@ -157,6 +158,8 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
+  const imagePath = place.image;
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -169,6 +172,10 @@ const deletePlace = async (req, res, next) => {
       new HttpError('Something went wrong, could not delete place.', 500)
     );
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
 
   res.status(200).json({ message: 'Deleted place.' });
 };
