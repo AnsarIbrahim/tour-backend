@@ -74,7 +74,7 @@ const createPlace = async (req, res, next) => {
     address,
     location: coordinates,
     image:
-      'https://images.unsplash.com/photo-1611095977412-6d0b1a7b8d9b?ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80',
+      'https://unsplash.com/photos/man-in-middle-of-wheat-field-6VPEOdpFNAs/download?force=true&w=1920',
     creator,
   });
 
