@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -59,7 +61,7 @@ const createPlace = async (req, res, next) => {
     next(new HttpError('Invalid inputs passed, please check your data.', 422));
   }
 
-  const { title, description, address, creator } = req.body;
+  const { title, description, address } = req.body;
 
   let coordinates;
   try {
@@ -73,15 +75,14 @@ const createPlace = async (req, res, next) => {
     description,
     address,
     location: coordinates,
-    image:
-      'https://images.unsplash.com/photo-1611095977412-6d0b1a7b8d9b?ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&ixlib=rb-1.2.1&w=1000&q=80',
-    creator,
+    image: req.file.path,
+    creator: req.userData.userId,
   });
 
   let user;
 
   try {
-    user = await User.findById(creator);
+    user = await User.findById(req.userData.userId);
   } catch (error) {
     return next(new HttpError('Creating place failed, please try again.', 500));
   }
@@ -124,6 +125,10 @@ const updatePlace = async (req, res, next) => {
     );
   }
 
+  if (place.creator.toString() !== req.userData.userId) {
+    return next(new HttpError('You are not allowed to edit this place.', 401));
+  }
+
   place.title = title;
   place.description = description;
 
@@ -157,6 +162,14 @@ const deletePlace = async (req, res, next) => {
     );
   }
 
+  if (place.creator.id !== req.userData.userId) {
+    return next(
+      new HttpError('You are not allowed to delete this place.', 401)
+    );
+  }
+
+  const imagePath = place.image;
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -169,6 +182,10 @@ const deletePlace = async (req, res, next) => {
       new HttpError('Something went wrong, could not delete place.', 500)
     );
   }
+
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
 
   res.status(200).json({ message: 'Deleted place.' });
 };
