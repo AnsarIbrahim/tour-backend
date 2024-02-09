@@ -1,9 +1,9 @@
 const axios = require('axios');
 const HttpError = require('../models/http-error');
+require('dotenv').config({ path: '../config.env' });
 
-const MAPBOX_API_KEY =
-  'pk.eyJ1IjoiYW5zYXJpYnJhaGltIiwiYSI6ImNscW0ybmc0NjAxc2YyaXNicGtzM25saXcifQ.G9cUWgFtRkJlVN7XID3_ZQ';
-
+const mapboxKey = process.env.MAPBOX_API_KEY;
+const MAPBOX_API_KEY = mapboxKey;
 const getGeocode = async (address) => {
   const response = await axios.get(
     `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(

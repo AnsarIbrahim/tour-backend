@@ -1,6 +1,11 @@
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+require('dotenv').config({ path: '../config.env' });
+
+const jwtKey = process.env.JWT_KEY;
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
@@ -60,11 +65,18 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
+  let imageBuffer;
+  if (req.file) {
+    imageBuffer = fs.readFileSync(req.file.path);
+  } else {
+    imageBuffer = fs.readFileSync('uploads/images/default.jpg');
+  }
+
   const createdUser = new User({
     name,
     email,
     password: hashedPassword,
-    image: req.file.path,
+    image: imageBuffer,
     places: [],
   });
 
@@ -80,7 +92,7 @@ const signup = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: createdUser.id, email: createdUser.email },
-      'supersecret_dont_share',
+      jwtKey,
       { expiresIn: '1h' }
     );
   } catch (err) {
@@ -141,7 +153,7 @@ const login = async (req, res, next) => {
   try {
     token = jwt.sign(
       { userId: existingUser.id, email: existingUser.email },
-      'supersecret_dont_share',
+      jwtKey,
       { expiresIn: '1h' }
     );
   } catch (err) {
