@@ -65,7 +65,12 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  const imageBuffer = fs.readFileSync(req.file.path);
+  let imageBuffer;
+  if (req.file) {
+    imageBuffer = fs.readFileSync(req.file.path);
+  } else {
+    imageBuffer = fs.readFileSync('uploads/images/default.jpg');
+  }
 
   const createdUser = new User({
     name,

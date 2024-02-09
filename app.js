@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -15,6 +16,7 @@ const HttpError = require('./models/http-error');
 
 const app = express();
 
+app.use(cors());
 app.use(bodyParser.json());
 
 const dir = './uploads/images';
@@ -32,7 +34,7 @@ const fileStorage = multer.diskStorage({
   },
 });
 
-app.use(multer({ storage: fileStorage }).single('image'));
+app.use('uploads/images', express.static(path.join('uploads', 'images')));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -61,6 +63,8 @@ app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
   }
+
+  console.log(error);
 
   res.status(error.code || 500);
   res.json({ message: error.message || 'An unknown error occurred!' });
