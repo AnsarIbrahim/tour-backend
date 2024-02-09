@@ -7,6 +7,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const multer = require('multer');
 
 const placesRoutes = require('./routes/places-routes');
 const usersRoutes = require('./routes/users-routes');
@@ -16,7 +17,22 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.use('uploads/images', express.static(path.join('uploads', 'images')));
+const dir = './uploads/images';
+
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/images');
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString() + '-' + file.originalname);
+  },
+});
+
+app.use(multer({ storage: fileStorage }).single('image'));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

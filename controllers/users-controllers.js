@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -63,11 +65,13 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
+  const imageBuffer = fs.readFileSync(req.file.path);
+
   const createdUser = new User({
     name,
     email,
     password: hashedPassword,
-    image: req.file.path,
+    image: imageBuffer,
     places: [],
   });
 

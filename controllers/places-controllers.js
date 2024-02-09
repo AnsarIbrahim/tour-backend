@@ -70,12 +70,14 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
+  const imageBuffer = fs.readFileSync(req.file.path);
+
   const createdPlace = new Place({
     title,
     description,
     address,
     location: coordinates,
-    image: req.file.path,
+    image: imageBuffer,
     creator: req.userData.userId,
   });
 
